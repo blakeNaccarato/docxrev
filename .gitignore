@@ -1,3 +1,10 @@
+# Project-specific
+.vscode/
+.env
+.flake8
+.pylintrc
+requirements.txt
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
