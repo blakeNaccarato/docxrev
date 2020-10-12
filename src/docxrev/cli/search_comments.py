@@ -1,3 +1,4 @@
+def main(pattern: str, directory: str = CWD):
 """Print Word document review comments matching a regular expression.
 
 Search for the regular expression `pattern` in all Word documents in the current working
@@ -82,4 +83,4 @@ def _search_comments(pattern: str, directory: str = _CWD):
 
 
 if __name__ == "__main__":
-    fire.Fire(_search_comments)
+    fire.Fire(main)
