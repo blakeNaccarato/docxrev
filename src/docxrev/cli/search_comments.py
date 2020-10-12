@@ -1,45 +1,37 @@
-def main(pattern: str, directory: str = CWD):
-"""Print Word document review comments matching a regular expression.
-
-Search for the regular expression `pattern` in all Word documents in the current working
-directory, or `directory` if supplied.
-
-CLI powered by [Python Fire](https://google.github.io/python-fire/guide/).
-
-Examples
---------
-Get help for the command.
-    py search_commments.py --help
-
-Search for "word". Quotes are unnecessary.
-    py search_comments.py word
-
-Search for "multiple words". Quotes are necessary.
-    py search_commments.py "multiple words"
-
-Search all files in "C:\\Users\\You\\Desktop". Quotes are unnecessary.
-    py search_commments.py word --directory C:\\Users\\You\\Desktop
-
-Search all files in "C:\\Users\\You\\Desktop\\Space In Path". Quotes are necessary.
-    py search_commments.py word --directory "C:\\Users\\You\\Desktop\\Space In Path"
-"""
+"""CLI to search comments."""
 
 import os
 import re
 from glob import glob
 
+import docxrev
 import fire
 
-import docxrev
-
-_CWD = os.getcwd()
+CWD = os.getcwd()
 
 
-def _search_comments(pattern: str, directory: str = _CWD):
+def main(pattern: str, directory: str = CWD):
     """Print Word document review comments matching a regular expression.
 
     Search for the regular expression `pattern` in all Word documents in the current
     working directory, or `directory` if supplied.
+
+    Examples
+    --------
+    Get help for the command.
+        py search_commments.py --help
+
+    Search for "word". Quotes are unnecessary.
+        py search_comments.py word
+
+    Search for "multiple words". Quotes are necessary.
+        py search_commments.py "multiple words"
+
+    Search all files in "C:\\Users\\You\\Desktop". Quotes are unnecessary.
+        py search_commments.py word --directory C:\\Users\\You\\Desktop
+
+    Search all files in "C:\\Users\\You\\Desktop\\Space In Path". Quotes are necessary.
+        py search_commments.py word --directory "C:\\Users\\You\\Desktop\\Space In Path"
 
     Parameters
     ----------
@@ -49,7 +41,7 @@ def _search_comments(pattern: str, directory: str = _CWD):
         Directory in which to search. Default is current working directory.
     """
 
-    if directory is not _CWD:
+    if directory is not CWD:
         os.chdir(directory)
 
     documents_in_directory = [os.path.abspath(path) for path in glob("[!~$]*.docx")]
