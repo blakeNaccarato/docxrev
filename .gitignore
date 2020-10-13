@@ -1,4 +1,7 @@
 # Project-specific
+*.docx
+
+# Dev
 .vscode/
 .env
 .flake8
