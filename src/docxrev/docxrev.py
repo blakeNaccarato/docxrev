@@ -2,22 +2,21 @@
 Microsoft Word review tools (comments, markup, etc.) with Python
 """
 
-import shutil
+from docxrev import com
+from docxrev.com import Document
 
-import win32com.client
 
-# * -------------------------------------------------------------------------------- * #
-# * SETUP
-# * Get the instance of Word running on this machine. Start it if necessary.
+def quit_word():
+    """Quit Word."""
+    com.WORD.Quit()
 
-try:
-    WORD = win32com.client.gencache.EnsureDispatch("Word.Application")
-except AttributeError:
-    # We end up here if this cryptic error occurs.
-    # https://stackoverflow.com/questions/52889704/python-win32com-excel-com-model-started-generating-errors
-    # https://mail.python.org/pipermail/python-win32/2007-August/006147.html
-    shutil.rmtree(win32com.__gen_path__)
-    WORD = win32com.client.gencache.EnsureDispatch("Word.Application")
 
-# * -------------------------------------------------------------------------------- * #
-# * FUNCTIONS * #
+def quit_word_safely():
+    """Quit Word if no documents are open."""
+    if not com.WORD.Documents:
+        quit_word()
+
+
+def get_active_document() -> Document:
+    """Get the current document."""
+    return Document(com.WORD.ActiveDocument.FullName)

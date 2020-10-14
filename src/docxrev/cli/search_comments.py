@@ -1,16 +1,18 @@
 """CLI to search comments."""
 
 import os
+import pathlib
 import re
-from glob import glob
+from typing import Union
+
+import fire
 
 import docxrev
-import fire
 
 CWD = os.getcwd()
 
 
-def main(pattern: str, directory: str = CWD):
+def main(pattern: str, directory: Union[str, pathlib.Path] = CWD):
     """Print Word document review comments matching a regular expression.
 
     Search for the regular expression `pattern` in all Word documents in the current
@@ -41,37 +43,21 @@ def main(pattern: str, directory: str = CWD):
         Directory in which to search. Default is current working directory.
     """
 
-    if directory is not CWD:
-        os.chdir(directory)
-
-    documents_in_directory = [os.path.abspath(path) for path in glob("[!~$]*.docx")]
-    already_open_documents = [document.Name for document in docxrev.WORD.Documents]
+    directory = pathlib.Path(directory)
+    paths = directory.glob("[!~$]*.docx")
 
     print()  # make newline between the shell command and the first result
 
-    for document in documents_in_directory:
-
-        document_name = os.path.basename(document)
-
-        if document_name in already_open_documents:
-            docxrev.WORD.Documents(document).Activate()
-        else:
-            docxrev.WORD.Documents.Open(document)
-
-        active_doc = docxrev.WORD.ActiveDocument
-        comments = [comment.Range.Text for comment in active_doc.Comments]
-
-        for comment in comments:
-            if re.search(pattern, comment):
-                print(
-                    docxrev.WORD.ActiveDocument.Name,
-                    comment.replace("\r", "\t"),
-                    sep="\n",
-                    end="\n" * 2,
-                )
-
-        if document_name not in already_open_documents:
-            docxrev.WORD.ActiveDocument.Close()
+    for path in paths:
+        with docxrev.Document(path) as document:
+            for comment in document.comments:
+                if re.search(pattern, comment):
+                    print(
+                        document.name,
+                        comment.replace("\r", "\t"),
+                        sep="\n",
+                        end="\n" * 2,
+                    )
 
 
 if __name__ == "__main__":
