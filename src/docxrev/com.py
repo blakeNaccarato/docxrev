@@ -116,7 +116,7 @@ class Document(AbstractContextManager):
         self.com.Activate()
         self.com.ActiveWindow.Visible = self.visible  # enforce visibility on the window
         self.name = self.com.Name
-        self.comments = Comments(self.com)
+        self.comments = Comments(self)
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
@@ -149,18 +149,21 @@ class Comments(abc.Sequence):
 
     Parameters
     ----------
-    com_document
-        The COM object representation of the document.
+    document
+        The document from which to retrieve comments.
 
     Attributes
     ----------
+    in_document
+        The document in which the comments reside.
     com
         The COM object representation of the comments.
 
     """
 
-    def __init__(self, com_document):
-        self.com = com_document.Comments
+    def __init__(self, document: Document):
+        self.in_document = document
+        self.com = self.in_document.com.Comments
 
     def __getitem__(self, index):
         if isinstance(index, slice):
@@ -169,11 +172,11 @@ class Comments(abc.Sequence):
         else:
             key = index
             com_comment = self.com(key + 1)  # COM is 1-indexed
-            comment = Comment(com_comment)
+            comment = Comment(com_comment, self)
         return comment
 
     def __iter__(self):
-        return (Comment(com_comment) for com_comment in self.com)
+        return (Comment(com_comment, self) for com_comment in self.com)
 
     def __len__(self):
         return len(self.com)
@@ -186,30 +189,39 @@ class Comment:
     ----------
     com_comment
         The COM object representation of the comment.
+    comments
+        The list of comments in which this comment resides.
 
     Attributes
     ----------
-    range: Range
-        The text range associated with the comment.
+    in_comments
+        The list of comments in which this comment resides.
+    in_document
+        The document in which this comment resides.
     com
         The COM object representation of the comment.
+    range
+    text
     """
 
-    def __init__(self, com_comment):
+    def __init__(self, com_comment, comments):
         self.com = com_comment
-        self.com_document = self.com.Parent
+        self.in_comments = comments
+        self.in_document = self.in_comments.in_document
 
     @property
     def range(self):
-        """The comment's range.
-        Convenience property returning this comment's range.
+        """
+        range
+            Convenience property returning this comment's range.
         """
         return Range(self.com.Range)
 
     @property
     def text(self):
-        """The comment's text.
-        Convenience property returning this comment's text.
+        """
+        text
+            Convenience property returning this comment's text.
         """
         return self.range.text
 
@@ -222,16 +234,17 @@ class Comment:
 
         Parameters
         ----------
-        text: str
+        text
             The full text replacement of the comment.
         """
 
-        com_active_window = self.com_document.ActiveWindow
+        com_active_window = self.in_document.com.ActiveWindow
         original_cursor_position = com_active_window.Selection.Range
+        com_active_window.Panes(1).Activate()  # Ensure we're in the main pane
 
         self.range.com.Select()
-        com_active_window.Selection.Text = text
-        com_active_window.ActivePane.Close()
+        com_active_window.Selection.Text = text  # Replace the text
+        com_active_window.ActivePane.Close()  # Close the comments pane that comes up
         com_active_window.ActivePane.View.Type = constants.wdPrintView
 
         original_cursor_position.Select()
@@ -247,20 +260,19 @@ class Range:
 
     Attributes
     ----------
-    text: str
-        The text of the range.
     com
         The COM object representation of the text range.
-
+    text
     """
 
     def __init__(self, com_range):
         self.com = com_range
 
     @property
-    def text(self):
-        """The range's text.
-        Convenience property returning this range's text.
+    def text(self) -> str:
+        """
+        text
+            Convenience property returning this range's text.
         """
         return self.com.Text
 
@@ -273,7 +285,7 @@ def try_com(
     com_method: Callable,
     except_errors: Union[ComError, List[ComError]] = None,
     messages: Union[str, List[str]] = None,
-    **kwds,
+    **kwargs,
 ):
     """Try a COM method, warn about specified COM errors, and raise the rest.
 
@@ -287,13 +299,13 @@ def try_com(
 
     Parameters
     ----------
-    com_method: callable
+    com_method
         The COM object representation of the comment.
-    except_errors: int, list(int), optional
+    except_errors
         The `hresults` or list of `com_error` to catch
-    messages: str, list(str), optional
+    messages
         The warning to be printed when the error is caught.
-    **kwds
+    **kwargs
         The keyword arguments to be passed to the COM method.
 
     Returns
@@ -313,7 +325,7 @@ def try_com(
         messages = [messages]
 
     try:
-        returns = com_method(**kwds)
+        returns = com_method(**kwargs)
 
     except pywintypes.com_error as error:  # pylint: disable=no-member
         returns = None
