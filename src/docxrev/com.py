@@ -283,8 +283,8 @@ class Range:
 
 def try_com(
     com_method: Callable,
-    except_errors: Union[ComError, List[ComError]] = None,
-    messages: Union[str, List[str]] = None,
+    except_errors: Optional[Union[ComError, List[ComError]]] = None,
+    messages: Optional[Union[str, List[str]]] = None,
     **kwargs,
 ):
     """Try a COM method, warn about specified COM errors, and raise the rest.
