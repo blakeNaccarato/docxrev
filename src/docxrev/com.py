@@ -20,13 +20,13 @@ from win32com.client import constants
 
 # Get the instance of Word running on this machine. Start it if necessary.
 try:
-    WORD = win32com.client.gencache.EnsureDispatch("Word.Application")
+    COM_WORD = win32com.client.gencache.EnsureDispatch("Word.Application")
 except AttributeError:
     # We end up here if this cryptic error occurs.
     # https://stackoverflow.com/questions/52889704/python-win32com-excel-com-model-started-generating-errors
     # https://mail.python.org/pipermail/python-win32/2007-August/006147.html
     shutil.rmtree(win32com.__gen_path__)
-    WORD = win32com.client.gencache.EnsureDispatch("Word.Application")
+    COM_WORD = win32com.client.gencache.EnsureDispatch("Word.Application")
 
 
 @dataclass
@@ -94,7 +94,7 @@ class Document(AbstractContextManager):
 
         # Check if the document is already open, set close_on_exit accordingly
         if self.close_on_exit is None:
-            already_open_documents = [doc.Name for doc in WORD.Documents]
+            already_open_documents = [doc.Name for doc in COM_WORD.Documents]
             if self.path.name in already_open_documents:
                 self.close_on_exit = False
             else:
@@ -112,7 +112,9 @@ class Document(AbstractContextManager):
         self.comments = None
 
     def __enter__(self):
-        self.com = WORD.Documents.Open(str(self.path.resolve()), Visible=self.visible)
+        self.com = COM_WORD.Documents.Open(
+            str(self.path.resolve()), Visible=self.visible
+        )
         self.com.Activate()
         self.com.ActiveWindow.Visible = self.visible  # enforce visibility on the window
         self.name = self.com.Name
@@ -283,8 +285,8 @@ class Range:
 
 def try_com(
     com_method: Callable,
-    except_errors: Union[ComError, List[ComError]] = None,
-    messages: Union[str, List[str]] = None,
+    except_errors: Optional[Union[ComError, List[ComError]]] = None,
+    messages: Optional[Union[str, List[str]]] = None,
     **kwargs,
 ):
     """Try a COM method, warn about specified COM errors, and raise the rest.
