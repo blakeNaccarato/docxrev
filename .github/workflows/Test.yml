@@ -6,6 +6,4 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Test
-        run: |
-          py -0d
-          tree
+        run: py -m pip install docxrev
