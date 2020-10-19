@@ -6,7 +6,7 @@ Microsoft Word.
 import pathlib
 import shutil
 from collections import abc
-from contextlib import AbstractContextManager
+from contextlib import AbstractContextManager, nullcontext
 from dataclasses import dataclass
 from typing import Callable, List, Optional, Union
 from warnings import warn
@@ -109,10 +109,10 @@ class Document(AbstractContextManager):
     def __enter__(self):
         self.already_in_context = True
         self.com = COM_WORD.Documents.Open(
-            str(self.path.resolve()), Visible=self.visible
+            str(self.path.resolve()), Visible=self.visible_on_enter
         )
         self.com.Activate()
-        self.com.ActiveWindow.Visible = self.visible  # enforce visibility on the window
+        self.com.ActiveWindow.Visible = self.visible_on_enter  # enforce visibility
         self.name = self.com.Name
         self.comments = Comments(self)
         return self
@@ -142,6 +142,11 @@ class Document(AbstractContextManager):
                 except_errors=errors["command_not_available"],
                 messages=warning_message,
             )
+
+    @property
+    def visible_on_enter(self) -> bool:
+        """Whether to make the document visible when entering context."""
+        return not self.close_on_exit
 
 
 class Comments(abc.Sequence):
