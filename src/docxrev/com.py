@@ -77,8 +77,8 @@ class Document(AbstractContextManager):
         The COM object representation of the document. Only exists in a `with` context.
     comments: Comments, optional
         The comments in the document. Only exists when in a `with` context.
-    visible: bool
-        Whether to open the document in a visible state. Opposite of `close_on_exit`.
+    already_in_context: bool
+        Whether the document is already in a `with` context to prevent nested context.
     """
 
     def __init__(
@@ -100,18 +100,14 @@ class Document(AbstractContextManager):
             else:
                 self.close_on_exit = True
 
-        # Whether to open the document in a visible state or not
-        if self.close_on_exit:
-            self.visible = False
-        else:
-            self.visible = True
-
+        self.already_in_context = False
         # These attributes only exist in context of a `with` block
         self.com = None
         self.name = None
         self.comments = None
 
     def __enter__(self):
+        self.already_in_context = True
         self.com = COM_WORD.Documents.Open(
             str(self.path.resolve()), Visible=self.visible
         )
@@ -122,6 +118,7 @@ class Document(AbstractContextManager):
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
+        self.already_in_context = False
         if self.save_on_exit:
             self.com.Save()
         if self.close_on_exit:
@@ -138,7 +135,8 @@ class Document(AbstractContextManager):
             " There may have been no comments in the first place."
         )
 
-        with self:
+        context_manager = nullcontext() if self.already_in_context else self
+        with context_manager:
             try_com(
                 com_method=self.com.DeleteAllComments,
                 except_errors=errors["command_not_available"],
