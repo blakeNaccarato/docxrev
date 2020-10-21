@@ -61,24 +61,24 @@ class Document(AbstractContextManager):
 
     Parameters
     ----------
-    path: str, pathlib.Path
+    path
         Path to the document.
-    save_on_exit: bool, default True
+    save_on_exit
         Whether to save the document when exiting a `with` context.
-    close_on_exit: bool, optional
+    close_on_exit
         Whether to close the document when exiting a `with` context. By default, closes
         documents that were not already open.
 
     Attributes
     ----------
-    path: pathlib.Path
+    path
         Path to the document, guaranteed to be a `pathlib.Path`.
-    com: optional
+    com
         The COM object representation of the document. Only exists in a `with` context.
-    comments: Comments, optional
+    comments
         The comments in the document. Only exists when in a `with` context.
-    already_in_context: bool
-        Whether the document is already in a `with` context to prevent nested context.
+    context_count
+        The count of nested contexts. Ensures only the outermost context wraps up.
     """
 
     def __init__(
@@ -100,14 +100,14 @@ class Document(AbstractContextManager):
             else:
                 self.close_on_exit = True
 
-        self.already_in_context = False
         # These attributes only exist in context of a `with` block
+        self.context_count = 0
         self.com = None
         self.name = None
         self.comments = None
 
     def __enter__(self):
-        self.already_in_context = True
+        self.context_count += 1
         self.com = COM_WORD.Documents.Open(
             str(self.path.resolve()), Visible=self.visible_on_enter
         )
@@ -118,14 +118,16 @@ class Document(AbstractContextManager):
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        self.already_in_context = False
-        if self.save_on_exit:
-            self.com.Save()
-        if self.close_on_exit:
-            self.com.Close(SaveChanges=False)
-        self.com = None
-        self.name = None
-        self.comments = None
+        if self.context_count > 1:
+            self.context_count -= 1
+        else:
+            if self.save_on_exit:
+                self.com.Save()
+            if self.close_on_exit:
+                self.com.Close(SaveChanges=False)
+            self.com = None
+            self.name = None
+            self.comments = None
 
     def delete_comments(self):
         """Delete all comments in the document."""
@@ -135,8 +137,7 @@ class Document(AbstractContextManager):
             " There may have been no comments in the first place."
         )
 
-        context_manager = nullcontext() if self.already_in_context else self
-        with context_manager:
+        with self:
             try_com(
                 com_method=self.com.DeleteAllComments,
                 except_errors=errors["command_not_available"],
