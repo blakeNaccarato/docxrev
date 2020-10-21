@@ -243,15 +243,32 @@ class Comment:
             The full text replacement of the comment.
         """
 
+        # Shorthand to various COM objects
         com_active_window = self.in_document.com.ActiveWindow
-        original_cursor_position = com_active_window.Selection.Range
-        com_active_window.Panes(1).Activate()  # Ensure we're in the main pane
+        com_active_selection = com_active_window.Selection
+        original_cursor_position = com_active_selection.Range
 
+        # Check whether the cursor is inside any comment
+        com_active_window.Panes(1).Activate()  # Ensure we're in the main pane
+        cursor_in_any_comment = (
+            original_cursor_position.StoryType == constants.wdCommentsStory
+        )
+        # If it is, move the cursor to the text that the particular comment is
+        # referencing. Note that this is *a* comment, not necessarily *this* comment.
+        # This sidesteps an issue where a comment range cannot be selected while the
+        # cursor is inside another comment.
+        if cursor_in_any_comment:
+            com_active_selection.Comments(1).Reference.Select()
+            com_active_selection.Font.Reset()  # Prevent leaking comment's font format
+            original_cursor_position = com_active_selection.Range
+
+        # Select and replace the text of the comment
         self.range.com.Select()
-        com_active_window.Selection.Text = text  # Replace the text
+        com_active_window.Selection.Text = text
+
+        # Restore print view and cursor position
         com_active_window.ActivePane.Close()  # Close the comments pane that comes up
         com_active_window.ActivePane.View.Type = constants.wdPrintView
-
         original_cursor_position.Select()
 
 
