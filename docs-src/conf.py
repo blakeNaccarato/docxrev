@@ -11,7 +11,7 @@ sys.path.insert(0, str(pathlib.Path(r"..\src").resolve()))
 
 extensions = ["sphinx.ext.napoleon", "sphinx.ext.autodoc"]
 
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+exclude_patterns = ["docs", "Thumbs.db", ".DS_Store"]
 
 add_module_names = False
 autodoc_member_order = "bysource"
