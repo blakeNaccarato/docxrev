@@ -2,8 +2,7 @@
 
 from typing import Optional
 
-from . import com
-from .com import Document
+from docxrev import com
 
 
 def quit_word():
@@ -18,7 +17,20 @@ def quit_word_safely():
 
 
 def get_active_document(
-    save_on_exit: bool = True, close_on_exit: Optional[bool] = None
-) -> Document:
-    """Get the current document."""
-    return Document(com.COM_WORD.ActiveDocument.FullName, save_on_exit, close_on_exit)
+    save_on_exit: Optional[bool] = True, close_on_exit: Optional[bool] = False
+) -> com.Document:
+    """Get the currently active document.
+
+    Parameters
+    ----------
+    save_on_exit: test
+        Whether to save the document when exiting a ``with`` context. **Default:**
+        ``True``.
+    close_on_exit
+        Whether to close the document when exiting a ``with`` context. **Default:**
+        Don't close the document on exit.
+    """
+
+    return com.Document(
+        com.COM_WORD.ActiveDocument.FullName, save_on_exit, close_on_exit
+    )

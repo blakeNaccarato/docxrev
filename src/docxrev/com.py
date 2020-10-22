@@ -1,14 +1,15 @@
 """
-Classes that expose aspects of the Microsoft Word Component Object Model (COM) for
-Microsoft Word.
+Classes that expose aspects of the Microsoft Word Component Object Model (COM).
 """
+
+from __future__ import annotations
 
 import pathlib
 import shutil
 from collections import abc
-from contextlib import AbstractContextManager, nullcontext
+from contextlib import AbstractContextManager
 from dataclasses import dataclass
-from typing import Callable, List, Optional, Union
+from typing import Callable, Dict, Iterator, List, Optional, Union
 from warnings import warn
 
 import pywintypes
@@ -28,30 +29,6 @@ except AttributeError:
     shutil.rmtree(win32com.__gen_path__)
     COM_WORD = win32com.client.gencache.EnsureDispatch("Word.Application")
 
-
-@dataclass
-class ComError:
-    """Represents a COM Error with uniquely identifying `hresult` and `scode`.
-
-    See EXCEPINFO documenation for reference.
-
-    https://docs.microsoft.com/en-us/windows/win32/api/oaidl/ns-oaidl-excepinfo
-
-    Parameters
-    ----------
-    hresult: int
-        An error identifier. A result handle that returns negative for an error.
-    scode:
-        Another error identifier. A return value that describes the error.
-    """
-
-    hresult: int
-    scode: int
-
-
-# Hresults for COM errors
-errors = {"command_not_available": ComError(-2147352567, -2146823683)}
-
 # * -------------------------------------------------------------------------------- * #
 # * CLASSES * #
 
@@ -61,34 +38,40 @@ class Document(AbstractContextManager):
 
     Parameters
     ----------
-    path
-        Path to the document.
-    save_on_exit
-        Whether to save the document when exiting a `with` context.
-    close_on_exit
-        Whether to close the document when exiting a `with` context. By default, closes
-        documents that were not already open.
+    path: Union[str, pathlib.Path]
+        Path to the document. May be a string.
+    save_on_exit: Optional[bool]
+        Whether to save the document when exiting a ``with`` context. Informs the
+        attribute :py:attr:`save_on_exit`.
+    close_on_exit: Optional[bool]
+        Whether to close the document when exiting a ``with`` context. By default,
+        closes documents that were not already open. Informs the attribute
+        :py:attr:`close_on_exit`.
 
     Attributes
     ----------
-    path
-        Path to the document, guaranteed to be a `pathlib.Path`.
-    com
-        The COM object representation of the document. Only exists in a `with` context.
-    comments
-        The comments in the document. Only exists when in a `with` context.
-    context_count
-        The count of nested contexts. Ensures only the outermost context wraps up.
+    com: win32com.gen_py.<temp_dir>.Document.Document
+        The COM object representation of the document. Only exists in a ``with``
+        context.
+    comments: Comments
+        The comments in the document. Only exists when in a ``with`` context.
+    name: str
+        The filename of the document.
+    save_on_exit: bool
+        Informed by the parameter ``save_on_exit``.
+    close_on_exit: bool
+        Informed by the parameter ``close_on_exit``.
     """
 
     def __init__(
         self,
         path: Union[str, pathlib.Path],
-        save_on_exit: bool = True,
+        save_on_exit: Optional[bool] = True,
         close_on_exit: Optional[bool] = None,
     ):
 
         self.path = pathlib.Path(path)
+        self.name = self.path.name
         self.save_on_exit = save_on_exit
         self.close_on_exit = close_on_exit
 
@@ -100,34 +83,53 @@ class Document(AbstractContextManager):
             else:
                 self.close_on_exit = True
 
-        # These attributes only exist in context of a `with` block
+        # Track nested levels of context
         self.context_count = 0
-        self.com = None
-        self.name = None
-        self.comments = None
 
-    def __enter__(self):
+    def __getattr__(self, name):
+        """Only called on an ``AttributeError``. Handle context-specific attributes."""
+
+        if name in {"com", "comments"}:
+            message = "Can only access this attribute in a `with` context."
+        else:
+            message = None
+
+        raise AttributeError(message)
+
+    def __enter__(self) -> Document:
+        """Activate the document and enforce visibility when entering context."""
+
         self.context_count += 1
+        visible_on_enter = not self.close_on_exit
+
+        # These attributes are meant to only exist in context
+        # pylint: disable=attribute-defined-outside-init
         self.com = COM_WORD.Documents.Open(
-            str(self.path.resolve()), Visible=self.visible_on_enter
+            str(self.path.resolve()), Visible=visible_on_enter
         )
-        self.com.Activate()
-        self.com.ActiveWindow.Visible = self.visible_on_enter  # enforce visibility
-        self.name = self.com.Name
         self.comments = Comments(self)
+        # pylint: enable=attribute-defined-outside-init
+
+        self.com.Activate()
+        self.com.ActiveWindow.Visible = visible_on_enter  # enforce visibility
+
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
+        """Optionally save and close the document when leaving the outermost context."""
+
         if self.context_count > 1:
             self.context_count -= 1
         else:
+            self.context_count = 0  # Probably redundant, but let's be explicit
+
             if self.save_on_exit:
                 self.com.Save()
+
             if self.close_on_exit:
                 self.com.Close(SaveChanges=False)
-            self.com = None
-            self.name = None
-            self.comments = None
+
+            del self.com, self.comments  # Delete context-specific attributes
 
     def delete_comments(self):
         """Delete all comments in the document."""
@@ -140,14 +142,9 @@ class Document(AbstractContextManager):
         with self:
             try_com(
                 com_method=self.com.DeleteAllComments,
-                except_errors=errors["command_not_available"],
+                except_errors=ERRORS["command_not_available"],
                 messages=warning_message,
             )
-
-    @property
-    def visible_on_enter(self) -> bool:
-        """Whether to make the document visible when entering context."""
-        return not self.close_on_exit
 
 
 class Comments(abc.Sequence):
@@ -155,36 +152,46 @@ class Comments(abc.Sequence):
 
     Parameters
     ----------
-    document
-        The document from which to retrieve comments.
+    document: Document
+        The document from which to retrieve comments.  Informs the attribute
+        :py:attr:`in_document`.
 
     Attributes
     ----------
-    in_document
-        The document in which the comments reside.
-    com
+    in_document: Document
+        The document in which the comments reside. Informed by the parameter
+        ``document``.
+    com: win32com.gen_py.<temp_dir>.Comments.Comments
         The COM object representation of the comments.
-
     """
 
     def __init__(self, document: Document):
         self.in_document = document
         self.com = self.in_document.com.Comments
 
-    def __getitem__(self, index):
-        if isinstance(index, slice):
-            keys = range(*index.indices(len(self)))  # coerce keys to object bounds
-            comment = [self[key] for key in keys]  # call __getitem__ w/ single elem
-        else:
+    def __getitem__(self, index):  # pylint: disable=inconsistent-return-statements
+        """Get comments.
+
+        The native COM object is one-indexed and has nothing analogous to Python's
+        ``slice`` indexing. This method enables zero-indexed, single-item or ``slice``
+        access to :py:class:`Comment` instances in :py:class:`Comments`.
+        """
+
+        if isinstance(index, int):
             key = index
             com_comment = self.com(key + 1)  # COM is 1-indexed
             comment = Comment(com_comment, self)
-        return comment
+            return comment
 
-    def __iter__(self):
+        if isinstance(index, slice):
+            keys = range(*index.indices(len(self)))  # coerce keys to object bounds
+            comments = [self[key] for key in keys]  # recursive call on each key
+            return comments
+
+    def __iter__(self) -> Iterator:
         return (Comment(com_comment, self) for com_comment in self.com)
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.com)
 
 
@@ -193,21 +200,23 @@ class Comment:
 
     Parameters
     ----------
-    com_comment
-        The COM object representation of the comment.
+    com_comment: win32com.gen_py.<temp_dir>.Comment.Comment
+        The COM object representation of the comment. Informs the attribute
+        :py:attr:`com`.
     comments
-        The list of comments in which this comment resides.
+        The list of comments in which this comment resides. Informs the attribute
+        :py:attr:`in_comments`.
 
     Attributes
     ----------
-    in_comments
-        The list of comments in which this comment resides.
-    in_document
+    in_comments: Comments
+        The list of comments in which this comment resides. Informed by the parameter
+        ``comments``.
+    in_document: Document
         The document in which this comment resides.
-    com
-        The COM object representation of the comment.
-    range
-    text
+    com: win32com.gen_py.<temp_dir>.Comment.Comment
+        The COM object representation of the comment. Informed by the parameter
+        ``com_comment``.
     """
 
     def __init__(self, com_comment, comments):
@@ -218,16 +227,16 @@ class Comment:
     @property
     def range(self):
         """
-        range
-            Convenience property returning this comment's range.
+        :win32com.gen_py.<temp_dir>.Range.Range: Convenience property returning this
+        comment's range.
         """
         return Range(self.com.Range)
 
     @property
     def text(self):
         """
-        text
-            Convenience property returning this comment's text.
+        :win32com.gen_py.<temp_dir>.Text.Text: Convenience property returning this
+        comment's text.
         """
         return self.range.text
 
@@ -240,7 +249,7 @@ class Comment:
 
         Parameters
         ----------
-        text
+        text: str
             The full text replacement of the comment.
         """
 
@@ -265,7 +274,7 @@ class Comment:
 
         # Select and replace the text of the comment
         self.range.com.Select()
-        com_active_window.Selection.Text = text
+        com_active_selection.Text = text
 
         # Restore print view and cursor position
         com_active_window.ActivePane.Close()  # Close the comments pane that comes up
@@ -278,30 +287,46 @@ class Range:
 
     Parameters
     ----------
-    com_range
-        The COM object representation of the text range.
+    com_range: win32com.gen_py.<temp_dir>.Range.Range
+        The COM object representation of the text range. Informs the attribute
+        :py:attr:`com`.
 
     Attributes
     ----------
-    com
-        The COM object representation of the text range.
-    text
+    com: win32com.gen_py.<temp_dir>.Range.Range
+        The COM object representation of the text range. Informed by the parameter
+        ``com_range``.
     """
-
-    def __init__(self, com_range):
-        self.com = com_range
 
     @property
     def text(self) -> str:
         """
-        text
-            Convenience property returning this range's text.
+        :win32com.gen_py.<temp_dir>.Text.Text: Convenience property returning this
+        range's text.
         """
         return self.com.Text
+
+    def __init__(self, com_range):
+        self.com = com_range
 
 
 # * -------------------------------------------------------------------------------- * #
 # * COM ERROR HANDLING * #
+
+
+@dataclass
+class ComError:
+    """Represents a COM Error by a unique identifying pair of ``hresult`` and ``scode``.
+
+    See EXCEPINFO documentation for reference.
+    https://docs.microsoft.com/en-us/windows/win32/api/oaidl/ns-oaidl-excepinfo
+    """
+
+    hresult: int
+    """An error identifier. Negative in case of an error."""
+
+    scode: int
+    """A more specific error identifier. Negative in case of an error."""
 
 
 def try_com(
@@ -312,28 +337,32 @@ def try_com(
 ):
     """Try a COM method, warn about specified COM errors, and raise the rest.
 
-    This function tries a COM method specified by `com_method`, catching generic COM
-    errors and handling specific cases. COM errors are specified by their `com_error`
-    rather than a Python exception type. In order to catch a specific error, supply the
-    `com_error` of the error and the `message` to be displayed as a warning when the
-    error is first caught. The `except_errors` and `messages` parameters also accept
-    lists. If no message is provided, only the generic COM error will appear in the
-    warning.
+    This function tries a COM method specified by ``com_method``, catching generic COM
+    errors and handling specific cases. COM errors are specified by a
+    :py:class:`ComError` instance rather than a Python exception type. In order to catch
+    a specific error, supply the :py:class:`ComError` specification of the error and the
+    ``message`` to be displayed as a warning when the error is first caught. The
+    ``except_errors`` and ``messages`` parameters also accept lists of errors to convert
+    to warnings. If no message is provided, only the generic COM error will appear in
+    the warning.
 
     Parameters
     ----------
     com_method
-        The COM object representation of the comment.
+        The COM method.
     except_errors
-        The `hresults` or list of `com_error` to catch
+        Error or list of errors to convert to warnings, as specified as
+        :py:class:`ComError` instance(s). **Default:** Don't convert any errors to
+        warnings.
     messages
-        The warning to be printed when the error is caught.
+        Warning or list of warnings to be printed when the error(s) is/are caught.
+        **Default:** Just print the generic COM errors as warnings.
     **kwargs
         The keyword arguments to be passed to the COM method.
 
     Returns
     -------
-    returns
+    Any
         Whatever is returned from the COM method.
     """
 
@@ -370,3 +399,9 @@ def try_com(
             raise error
 
     return returns
+
+
+ERRORS: Dict[str, ComError] = {
+    "command_not_available": ComError(-2147352567, -2146823683)
+}
+""":Dict[str, ComError]: A :py:class:`dict` of named :py:class:`ComError` errors."""
