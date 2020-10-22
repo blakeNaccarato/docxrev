@@ -22,3 +22,6 @@ napoleon_include_private_with_doc = True
 napoleon_include_special_with_doc = True
 
 html_theme = "sphinx_rtd_theme"
+html_theme_options = {
+    "collapse_navigation": False,
+}
