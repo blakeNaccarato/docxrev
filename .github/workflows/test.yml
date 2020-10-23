@@ -1,4 +1,4 @@
-name: test
+name: docs
 
 on:
   workflow_dispatch:
@@ -10,9 +10,8 @@ jobs:
       - uses: actions/checkout@v2
       - name: Set up Python
         run: |
-          py -m venv --clear ..\.venv
           ..\.venv\Scripts\Activate.ps1
-          pip install -r ..\requirements.txt
+          pip install --force-reinstall -r ..\requirements.txt
       - name: Build docs
         run: |
           sphinx-build docs-src docs
