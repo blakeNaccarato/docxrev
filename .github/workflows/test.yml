@@ -1,0 +1,11 @@
+name: test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: docs
+    steps:
+      - name: test
+        run: Get-Location          
