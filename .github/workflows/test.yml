@@ -5,7 +5,7 @@ on:
 
 jobs:
   test:
-    runs-on: docs
+    runs-on: Windows
     steps:
       - name: test
         run: Get-Location          
