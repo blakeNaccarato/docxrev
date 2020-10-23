@@ -311,7 +311,7 @@ class Range:
 
     @property
     def text(self) -> str:
-        """:str: Convenience property returning thisrange's text."""
+        """:str: Convenience property returning this range's text."""
         return self.com.Text
 
     def __init__(self, com_range):
