@@ -21,6 +21,8 @@ jobs:
           sphinx-build docs-src docs
       - name: Commit
         run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
           git commit -m "Rebuild documentation" -a
       - name: Push
         run: |
