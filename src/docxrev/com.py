@@ -44,7 +44,7 @@ class Document(AbstractContextManager):
 
     The context-specific attribute ``com`` exposes the ``win32com.<...>.Document`` class
     directly, a COM object representation of the document which has slightly different
-    syntax and access rules than regular Python. For example, collections are
+    syntax and access rules than regular Python. For example, COM object collections are
     one-indexed rather than zero-indexed. The ``comments`` attribute exposes certain
     aspects of the ``win32com.<...>.Comments`` class in a convenient, Pythonic
     :py:class:`Comments` class.
@@ -55,7 +55,7 @@ class Document(AbstractContextManager):
         Path to the document. May be a string.
     save_on_exit: Optional[bool]
         Whether to save the document when leaving context. Informs the attribute
-        :py:attr:`save_on_exit`.  **Default**: True.
+        :py:attr:`save_on_exit`.  **Default**: ``True``.
     close_on_exit: Optional[bool]
         Whether to close the document when leaving context. Informs the attribute
         :py:attr:`close_on_exit`. **Default**: Closes documents that were not already
@@ -102,11 +102,11 @@ class Document(AbstractContextManager):
         self.context_count = 0
 
     def __getattr__(self, name):
-        """Only called on an ``AttributeError``. Handle context-specific attributes."""
+        """Handle context-specific attributes. Only called on an ``AttributeError``."""
 
-        if name in {"com", "comments"}:
+        if name in {"com", "comments"}:  # context-specific attributes
             message = "Attribute only exists in context."
-        else:
+        else:  # the rest
             message = None
 
         raise AttributeError(message)
@@ -165,6 +165,11 @@ class Document(AbstractContextManager):
 class Comments(abc.Sequence):
     """The comments in an open Word document.
 
+    The native COM object ``win32com.<...>.Comments`` is one-indexed and has nothing
+    analogus to Python's ``slice`` indexing. This class enables zero-indexed,
+    single-item or ``slice`` access to instances of :py:class:`Comment`. The sequence of
+    comments can also be reversed with :py:func:`reversed`.
+
     Parameters
     ----------
     document: Document
@@ -185,12 +190,6 @@ class Comments(abc.Sequence):
         self.com = self.in_document.com.Comments
 
     def __getitem__(self, index):  # pylint: disable=inconsistent-return-statements
-        """Get comments.
-
-        The native COM object is one-indexed and has nothing analogous to Python's
-        ``slice`` indexing. This method enables zero-indexed, single-item or ``slice``
-        access to :py:class:`Comment` instances in :py:class:`Comments`.
-        """
 
         if isinstance(index, int):
             key = index

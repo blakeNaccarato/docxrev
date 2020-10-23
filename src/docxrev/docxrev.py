@@ -28,7 +28,7 @@ def get_active_document(
         ``True``.
     close_on_exit
         Whether to close the document when exiting a ``with`` context. **Default:**
-        Don't close the document on exit.
+        ``False``.
     """
 
     return com.Document(
