@@ -1,8 +1,6 @@
 Modules
 =======
 
-Hello!
-
 docxrev
 -------
 
