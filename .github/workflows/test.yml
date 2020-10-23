@@ -8,7 +8,11 @@ jobs:
     runs-on: Windows
     steps:
       - uses: actions/checkout@v2
-      - name: test
+      - name: Set up Python
         run: |
-          Get-Location
-          Get-ChildItem
+          py -m venv --clear ..\.venv
+          ..\.venv\Scripts\Activate.ps1
+          pip install -r ..\requirements.txt
+      - name: Build docs
+        run: |
+          sphinx-build docs-src docs
