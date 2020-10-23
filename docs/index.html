@@ -83,8 +83,8 @@
               <!-- Local TOC -->
               <div class="local-toc"><ul>
 <li><a class="reference internal" href="#">Modules</a><ul>
-<li><a class="reference internal" href="#docxrev">docxrev</a></li>
-<li><a class="reference internal" href="#docxrev-com">docxrev.com</a></li>
+<li><a class="reference internal" href="#module-docxrev.docxrev">docxrev</a></li>
+<li><a class="reference internal" href="#module-docxrev.com">docxrev.com</a></li>
 </ul>
 </li>
 </ul>
@@ -154,12 +154,394 @@
             
   <div class="section" id="modules">
 <h1>Modules<a class="headerlink" href="#modules" title="Permalink to this headline">¶</a></h1>
-<p>Hello from Ubuntu!</p>
-<div class="section" id="docxrev">
-<h2>docxrev<a class="headerlink" href="#docxrev" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-docxrev.docxrev">
+<span id="docxrev"></span><h2>docxrev<a class="headerlink" href="#module-docxrev.docxrev" title="Permalink to this headline">¶</a></h2>
+<p>Microsoft Word review tools (comments, markup, etc.) with Python.</p>
+<dl class="py function">
+<dt id="docxrev.docxrev.quit_word">
+<code class="sig-name descname">quit_word</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#docxrev.docxrev.quit_word" title="Permalink to this definition">¶</a></dt>
+<dd><p>Quit Word.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="docxrev.docxrev.quit_word_safely">
+<code class="sig-name descname">quit_word_safely</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#docxrev.docxrev.quit_word_safely" title="Permalink to this definition">¶</a></dt>
+<dd><p>Quit Word if no documents are open.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="docxrev.docxrev.get_active_document">
+<code class="sig-name descname">get_active_document</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">save_on_exit</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">close_on_exit</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#docxrev.docxrev.get_active_document" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the currently active document.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>save_on_exit</strong> (<em>Optional</em><em>[</em><em>bool</em><em>]</em>) – Whether to save the document when exiting a <code class="docutils literal notranslate"><span class="pre">with</span></code> context. <strong>Default:</strong>
+<code class="docutils literal notranslate"><span class="pre">True</span></code>.</p></li>
+<li><p><strong>close_on_exit</strong> (<em>Optional</em><em>[</em><em>bool</em><em>]</em>) – Whether to close the document when exiting a <code class="docutils literal notranslate"><span class="pre">with</span></code> context. <strong>Default:</strong>
+Don’t close the document on exit.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#docxrev.com.Document" title="docxrev.com.Document">docxrev.com.Document</a></p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
-<div class="section" id="docxrev-com">
-<h2>docxrev.com<a class="headerlink" href="#docxrev-com" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-docxrev.com">
+<span id="docxrev-com"></span><h2>docxrev.com<a class="headerlink" href="#module-docxrev.com" title="Permalink to this headline">¶</a></h2>
+<p>Classes that expose aspects of the Microsoft Word Component Object Model (COM).</p>
+<dl class="py class">
+<dt id="docxrev.com.Document">
+<em class="property">class </em><code class="sig-name descname">Document</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">save_on_exit</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">close_on_exit</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#docxrev.com.Document" title="Permalink to this definition">¶</a></dt>
+<dd><p>A Word document.</p>
+<p>Represents a Word document. Certain attributes, such as <code class="docutils literal notranslate"><span class="pre">name</span></code>, are always
+available. Others are only available “in context”. Throughout this documentation,
+“in context” means that the object is being handled by a context manager. For
+example, an object is “in context” inside an indented block beneath a <code class="docutils literal notranslate"><span class="pre">with</span> <span class="pre">&lt;item&gt;</span>
+<span class="pre">[as</span> <span class="pre">&lt;target&gt;]:</span></code> clause.</p>
+<p>The context-specific attribute <code class="docutils literal notranslate"><span class="pre">com</span></code> exposes the <code class="docutils literal notranslate"><span class="pre">win32com.&lt;...&gt;.Document</span></code> class
+directly, a COM object representation of the document which has slightly different
+syntax and access rules than regular Python. For example, collections are
+one-indexed rather than zero-indexed. The <code class="docutils literal notranslate"><span class="pre">comments</span></code> attribute exposes certain
+aspects of the <code class="docutils literal notranslate"><span class="pre">win32com.&lt;...&gt;.Comments</span></code> class in a convenient, Pythonic
+<a class="reference internal" href="#docxrev.com.Comments" title="docxrev.com.Comments"><code class="xref py py-class docutils literal notranslate"><span class="pre">Comments</span></code></a> class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>Union</em><em>[</em><em>str</em><em>, </em><em>pathlib.Path</em><em>]</em>) – Path to the document. May be a string.</p></li>
+<li><p><strong>save_on_exit</strong> (<em>Optional</em><em>[</em><em>bool</em><em>]</em>) – Whether to save the document when leaving context. Informs the attribute
+<a class="reference internal" href="#docxrev.com.Document.save_on_exit" title="docxrev.com.Document.save_on_exit"><code class="xref py py-attr docutils literal notranslate"><span class="pre">save_on_exit</span></code></a>.  <strong>Default</strong>: True.</p></li>
+<li><p><strong>close_on_exit</strong> (<em>Optional</em><em>[</em><em>bool</em><em>]</em>) – Whether to close the document when leaving context. Informs the attribute
+<a class="reference internal" href="#docxrev.com.Document.close_on_exit" title="docxrev.com.Document.close_on_exit"><code class="xref py py-attr docutils literal notranslate"><span class="pre">close_on_exit</span></code></a>. <strong>Default</strong>: Closes documents that were not already
+open.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt id="docxrev.com.Document.com">
+<code class="sig-name descname">com</code><a class="headerlink" href="#docxrev.com.Document.com" title="Permalink to this definition">¶</a></dt>
+<dd><p>The COM object representation of the document. Only exists in context.
+<code class="xref py py-class docutils literal notranslate"><span class="pre">AttributeError</span></code> is raised when attempting to access it out of
+context.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>win32com.&lt;…&gt;.Document</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="docxrev.com.Document.comments">
+<code class="sig-name descname">comments</code><a class="headerlink" href="#docxrev.com.Document.comments" title="Permalink to this definition">¶</a></dt>
+<dd><p>The comments in the document. Only exists in context. <code class="xref py py-class docutils literal notranslate"><span class="pre">AttributeError</span></code>
+is raised when attempting to access it out of context.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#docxrev.com.Comments" title="docxrev.com.Comments">Comments</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="docxrev.com.Document.name">
+<code class="sig-name descname">name</code><a class="headerlink" href="#docxrev.com.Document.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>The filename of the document.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="docxrev.com.Document.save_on_exit">
+<code class="sig-name descname">save_on_exit</code><a class="headerlink" href="#docxrev.com.Document.save_on_exit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Informed by the parameter <code class="docutils literal notranslate"><span class="pre">save_on_exit</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="docxrev.com.Document.close_on_exit">
+<code class="sig-name descname">close_on_exit</code><a class="headerlink" href="#docxrev.com.Document.close_on_exit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Informed by the parameter <code class="docutils literal notranslate"><span class="pre">close_on_exit</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="docxrev.com.Document.__getattr__">
+<code class="sig-name descname">__getattr__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em><span class="sig-paren">)</span><a class="headerlink" href="#docxrev.com.Document.__getattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Only called on an <code class="docutils literal notranslate"><span class="pre">AttributeError</span></code>. Handle context-specific attributes.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="docxrev.com.Document.__enter__">
+<code class="sig-name descname">__enter__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#docxrev.com.Document.__enter__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Activate the document and enforce visibility when entering context.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#docxrev.com.Document" title="docxrev.com.Document">docxrev.com.Document</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="docxrev.com.Document.__exit__">
+<code class="sig-name descname">__exit__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">exc_type</span></em>, <em class="sig-param"><span class="n">exc_value</span></em>, <em class="sig-param"><span class="n">traceback</span></em><span class="sig-paren">)</span><a class="headerlink" href="#docxrev.com.Document.__exit__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optionally save and close the document when leaving the outermost context.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="docxrev.com.Document.delete_comments">
+<code class="sig-name descname">delete_comments</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#docxrev.com.Document.delete_comments" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete all comments in the document.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="docxrev.com.Comments">
+<em class="property">class </em><code class="sig-name descname">Comments</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">document</span></em><span class="sig-paren">)</span><a class="headerlink" href="#docxrev.com.Comments" title="Permalink to this definition">¶</a></dt>
+<dd><p>The comments in an open Word document.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>document</strong> (<a class="reference internal" href="#docxrev.com.Document" title="docxrev.com.Document"><em>Document</em></a>) – The document from which to retrieve comments.  Informs the attribute
+<a class="reference internal" href="#docxrev.com.Comments.in_document" title="docxrev.com.Comments.in_document"><code class="xref py py-attr docutils literal notranslate"><span class="pre">in_document</span></code></a>.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt id="docxrev.com.Comments.in_document">
+<code class="sig-name descname">in_document</code><a class="headerlink" href="#docxrev.com.Comments.in_document" title="Permalink to this definition">¶</a></dt>
+<dd><p>The document in which the comments reside. Informed by the parameter
+<code class="docutils literal notranslate"><span class="pre">document</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#docxrev.com.Document" title="docxrev.com.Document">Document</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="docxrev.com.Comments.com">
+<code class="sig-name descname">com</code><a class="headerlink" href="#docxrev.com.Comments.com" title="Permalink to this definition">¶</a></dt>
+<dd><p>The COM object representation of the comments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>win32com.&lt;…&gt;.Comments</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="docxrev.com.Comments.__getitem__">
+<code class="sig-name descname">__getitem__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">index</span></em><span class="sig-paren">)</span><a class="headerlink" href="#docxrev.com.Comments.__getitem__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get comments.</p>
+<p>The native COM object is one-indexed and has nothing analogous to Python’s
+<code class="docutils literal notranslate"><span class="pre">slice</span></code> indexing. This method enables zero-indexed, single-item or <code class="docutils literal notranslate"><span class="pre">slice</span></code>
+access to <a class="reference internal" href="#docxrev.com.Comment" title="docxrev.com.Comment"><code class="xref py py-class docutils literal notranslate"><span class="pre">Comment</span></code></a> instances in <a class="reference internal" href="#docxrev.com.Comments" title="docxrev.com.Comments"><code class="xref py py-class docutils literal notranslate"><span class="pre">Comments</span></code></a>.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="docxrev.com.Comment">
+<em class="property">class </em><code class="sig-name descname">Comment</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">com_comment</span></em>, <em class="sig-param"><span class="n">comments</span></em><span class="sig-paren">)</span><a class="headerlink" href="#docxrev.com.Comment" title="Permalink to this definition">¶</a></dt>
+<dd><p>A comment in an open Word document.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>com_comment</strong> (<em>win32com.&lt;...&gt;.Comment</em>) – The COM object representation of the comment. Informs the attribute
+<a class="reference internal" href="#docxrev.com.Comment.com" title="docxrev.com.Comment.com"><code class="xref py py-attr docutils literal notranslate"><span class="pre">com</span></code></a>.</p></li>
+<li><p><strong>comments</strong> – The list of comments in which this comment resides. Informs the attribute
+<a class="reference internal" href="#docxrev.com.Comment.in_comments" title="docxrev.com.Comment.in_comments"><code class="xref py py-attr docutils literal notranslate"><span class="pre">in_comments</span></code></a>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt id="docxrev.com.Comment.in_comments">
+<code class="sig-name descname">in_comments</code><a class="headerlink" href="#docxrev.com.Comment.in_comments" title="Permalink to this definition">¶</a></dt>
+<dd><p>The list of comments in which this comment resides. Informed by the parameter
+<code class="docutils literal notranslate"><span class="pre">comments</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#docxrev.com.Comments" title="docxrev.com.Comments">Comments</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="docxrev.com.Comment.in_document">
+<code class="sig-name descname">in_document</code><a class="headerlink" href="#docxrev.com.Comment.in_document" title="Permalink to this definition">¶</a></dt>
+<dd><p>The document in which this comment resides.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#docxrev.com.Document" title="docxrev.com.Document">Document</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="docxrev.com.Comment.com">
+<code class="sig-name descname">com</code><a class="headerlink" href="#docxrev.com.Comment.com" title="Permalink to this definition">¶</a></dt>
+<dd><p>The COM object representation of the comment. Informed by the parameter
+<code class="docutils literal notranslate"><span class="pre">com_comment</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>win32com.&lt;…&gt;.Comment</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="docxrev.com.Comment.range">
+<em class="property">property </em><code class="sig-name descname">range</code><a class="headerlink" href="#docxrev.com.Comment.range" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convenience property returning this
+comment’s range.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>win32com.&lt;…&gt;.Range</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="docxrev.com.Comment.text">
+<em class="property">property </em><code class="sig-name descname">text</code><a class="headerlink" href="#docxrev.com.Comment.text" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convenience property returning this comment’s text.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="docxrev.com.Comment.delete">
+<code class="sig-name descname">delete</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#docxrev.com.Comment.delete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete the comment and its children.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="docxrev.com.Comment.update">
+<code class="sig-name descname">update</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">text</span></em><span class="sig-paren">)</span><a class="headerlink" href="#docxrev.com.Comment.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update the text of the comment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>text</strong> (<em>str</em>) – The full text replacement of the comment.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="docxrev.com.Range">
+<em class="property">class </em><code class="sig-name descname">Range</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">com_range</span></em><span class="sig-paren">)</span><a class="headerlink" href="#docxrev.com.Range" title="Permalink to this definition">¶</a></dt>
+<dd><p>A text range in an open Word document.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>com_range</strong> (<em>win32com.&lt;...&gt;.Range</em>) – The COM object representation of the text range. Informs the attribute
+<a class="reference internal" href="#docxrev.com.Range.com" title="docxrev.com.Range.com"><code class="xref py py-attr docutils literal notranslate"><span class="pre">com</span></code></a>.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt id="docxrev.com.Range.com">
+<code class="sig-name descname">com</code><a class="headerlink" href="#docxrev.com.Range.com" title="Permalink to this definition">¶</a></dt>
+<dd><p>The COM object representation of the text range. Informed by the parameter
+<code class="docutils literal notranslate"><span class="pre">com_range</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>win32com.&lt;…&gt;.Range</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="docxrev.com.Range.text">
+<em class="property">property </em><code class="sig-name descname">text</code><a class="headerlink" href="#docxrev.com.Range.text" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convenience property returning thisrange’s text.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="docxrev.com.ComError">
+<em class="property">class </em><code class="sig-name descname">ComError</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">hresult</span></em>, <em class="sig-param"><span class="n">scode</span></em><span class="sig-paren">)</span><a class="headerlink" href="#docxrev.com.ComError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents a COM Error by a unique identifying pair of <code class="docutils literal notranslate"><span class="pre">hresult</span></code> and <code class="docutils literal notranslate"><span class="pre">scode</span></code>.</p>
+<p>See EXCEPINFO documentation for reference.
+<a class="reference external" href="https://docs.microsoft.com/en-us/windows/win32/api/oaidl/ns-oaidl-excepinfo">https://docs.microsoft.com/en-us/windows/win32/api/oaidl/ns-oaidl-excepinfo</a></p>
+<dl class="py attribute">
+<dt id="docxrev.com.ComError.hresult">
+<code class="sig-name descname">hresult</code><em class="property">: int</em><a class="headerlink" href="#docxrev.com.ComError.hresult" title="Permalink to this definition">¶</a></dt>
+<dd><p>An error identifier. Negative in case of an error.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="docxrev.com.ComError.scode">
+<code class="sig-name descname">scode</code><em class="property">: int</em><a class="headerlink" href="#docxrev.com.ComError.scode" title="Permalink to this definition">¶</a></dt>
+<dd><p>A more specific error identifier. Negative in case of an error.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="docxrev.com.try_com">
+<code class="sig-name descname">try_com</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">com_method</span></em>, <em class="sig-param"><span class="n">except_errors</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">messages</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#docxrev.com.try_com" title="Permalink to this definition">¶</a></dt>
+<dd><p>Try a COM method, warn about specified COM errors, and raise the rest.</p>
+<p>This function tries a COM method specified by <code class="docutils literal notranslate"><span class="pre">com_method</span></code>, catching generic COM
+errors and handling specific cases. COM errors are specified by a
+<a class="reference internal" href="#docxrev.com.ComError" title="docxrev.com.ComError"><code class="xref py py-class docutils literal notranslate"><span class="pre">ComError</span></code></a> instance rather than a Python exception type. In order to catch
+a specific error, supply the <a class="reference internal" href="#docxrev.com.ComError" title="docxrev.com.ComError"><code class="xref py py-class docutils literal notranslate"><span class="pre">ComError</span></code></a> specification of the error and the
+<code class="docutils literal notranslate"><span class="pre">message</span></code> to be displayed as a warning when the error is first caught. The
+<code class="docutils literal notranslate"><span class="pre">except_errors</span></code> and <code class="docutils literal notranslate"><span class="pre">messages</span></code> parameters also accept lists of errors to convert
+to warnings. If no message is provided, only the generic COM error will appear in
+the warning.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>com_method</strong> (<em>Callable</em>) – The COM method.</p></li>
+<li><p><strong>except_errors</strong> (<em>Optional</em><em>[</em><em>Union</em><em>[</em><a class="reference internal" href="#docxrev.com.ComError" title="docxrev.com.ComError"><em>docxrev.com.ComError</em></a><em>, </em><em>List</em><em>[</em><a class="reference internal" href="#docxrev.com.ComError" title="docxrev.com.ComError"><em>docxrev.com.ComError</em></a><em>]</em><em>]</em><em>]</em>) – Error or list of errors to convert to warnings, as specified as
+<a class="reference internal" href="#docxrev.com.ComError" title="docxrev.com.ComError"><code class="xref py py-class docutils literal notranslate"><span class="pre">ComError</span></code></a> instance(s). <strong>Default:</strong> Don’t convert any errors to
+warnings.</p></li>
+<li><p><strong>messages</strong> (<em>Optional</em><em>[</em><em>Union</em><em>[</em><em>str</em><em>, </em><em>List</em><em>[</em><em>str</em><em>]</em><em>]</em><em>]</em>) – Warning or list of warnings to be printed when the error(s) is/are caught.
+<strong>Default:</strong> Just print the generic COM errors as warnings.</p></li>
+<li><p><strong>**kwargs</strong> – The keyword arguments to be passed to the COM method.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Whatever is returned from the COM method.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Any</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py data">
+<dt id="docxrev.com.ERRORS">
+<code class="sig-name descname">ERRORS</code><em class="property">: Dict<span class="p">[</span>str<span class="p">, </span><a class="reference internal" href="#docxrev.com.ComError" title="docxrev.com.ComError">docxrev.com.ComError</a><span class="p">]</span></em><em class="property"> = {'command_not_available': ComError(hresult=-2147352567, scode=-2146823683)}</em><a class="headerlink" href="#docxrev.com.ERRORS" title="Permalink to this definition">¶</a></dt>
+<dd><p>A <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code> of named <a class="reference internal" href="#docxrev.com.ComError" title="docxrev.com.ComError"><code class="xref py py-class docutils literal notranslate"><span class="pre">ComError</span></code></a> errors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>Dict[str, <a class="reference internal" href="#docxrev.com.ComError" title="docxrev.com.ComError">ComError</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 </div>
 
