@@ -195,27 +195,39 @@ Don’t close the document on exit.</p></li>
 <dl class="py class">
 <dt id="docxrev.com.Document">
 <em class="property">class </em><code class="sig-name descname">Document</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">save_on_exit</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">close_on_exit</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#docxrev.com.Document" title="Permalink to this definition">¶</a></dt>
-<dd><p>An open Word document.</p>
+<dd><p>A Word document.</p>
+<p>Represents a Word document. Certain attributes, such as <code class="docutils literal notranslate"><span class="pre">name</span></code>, are always
+available. Others are only available “in context”. Throughout this documentation,
+“in context” means that the object is being handled by a context manager. For
+example, an object is “in context” inside an indented block beneath a <code class="docutils literal notranslate"><span class="pre">with</span> <span class="pre">&lt;item&gt;</span>
+<span class="pre">[as</span> <span class="pre">&lt;target&gt;]:</span></code> clause.</p>
+<p>The context-specific attribute <code class="docutils literal notranslate"><span class="pre">com</span></code> exposes the <code class="docutils literal notranslate"><span class="pre">win32com.&lt;...&gt;.Document</span></code> class
+directly, a COM object representation of the document which has slightly different
+syntax and access rules than regular Python. For example, collections are
+one-indexed rather than zero-indexed. The <code class="docutils literal notranslate"><span class="pre">comments</span></code> attribute exposes certain
+aspects of the <code class="docutils literal notranslate"><span class="pre">win32com.&lt;...&gt;.Comments</span></code> class in a convenient, Pythonic
+<a class="reference internal" href="#docxrev.com.Comments" title="docxrev.com.Comments"><code class="xref py py-class docutils literal notranslate"><span class="pre">Comments</span></code></a> class.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>path</strong> (<em>Union</em><em>[</em><em>str</em><em>, </em><em>pathlib.Path</em><em>]</em>) – Path to the document. May be a string.</p></li>
-<li><p><strong>save_on_exit</strong> (<em>Optional</em><em>[</em><em>bool</em><em>]</em>) – Whether to save the document when exiting a <code class="docutils literal notranslate"><span class="pre">with</span></code> context. Informs the
-attribute <a class="reference internal" href="#docxrev.com.Document.save_on_exit" title="docxrev.com.Document.save_on_exit"><code class="xref py py-attr docutils literal notranslate"><span class="pre">save_on_exit</span></code></a>.</p></li>
-<li><p><strong>close_on_exit</strong> (<em>Optional</em><em>[</em><em>bool</em><em>]</em>) – Whether to close the document when exiting a <code class="docutils literal notranslate"><span class="pre">with</span></code> context. By default,
-closes documents that were not already open. Informs the attribute
-<a class="reference internal" href="#docxrev.com.Document.close_on_exit" title="docxrev.com.Document.close_on_exit"><code class="xref py py-attr docutils literal notranslate"><span class="pre">close_on_exit</span></code></a>.</p></li>
+<li><p><strong>save_on_exit</strong> (<em>Optional</em><em>[</em><em>bool</em><em>]</em>) – Whether to save the document when leaving context. Informs the attribute
+<a class="reference internal" href="#docxrev.com.Document.save_on_exit" title="docxrev.com.Document.save_on_exit"><code class="xref py py-attr docutils literal notranslate"><span class="pre">save_on_exit</span></code></a>.  <strong>Default</strong>: True.</p></li>
+<li><p><strong>close_on_exit</strong> (<em>Optional</em><em>[</em><em>bool</em><em>]</em>) – Whether to close the document when leaving context. Informs the attribute
+<a class="reference internal" href="#docxrev.com.Document.close_on_exit" title="docxrev.com.Document.close_on_exit"><code class="xref py py-attr docutils literal notranslate"><span class="pre">close_on_exit</span></code></a>. <strong>Default</strong>: Closes documents that were not already
+open.</p></li>
 </ul>
 </dd>
 </dl>
 <dl class="py attribute">
 <dt id="docxrev.com.Document.com">
 <code class="sig-name descname">com</code><a class="headerlink" href="#docxrev.com.Document.com" title="Permalink to this definition">¶</a></dt>
-<dd><p>The COM object representation of the document. Only exists in a <code class="docutils literal notranslate"><span class="pre">with</span></code>
+<dd><p>The COM object representation of the document. Only exists in context.
+<code class="xref py py-class docutils literal notranslate"><span class="pre">AttributeError</span></code> is raised when attempting to access it out of
 context.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>win32com.gen_py.&lt;temp_dir&gt;.Document.Document</p>
+<dd class="field-odd"><p>win32com.&lt;…&gt;.Document</p>
 </dd>
 </dl>
 </dd></dl>
@@ -223,7 +235,8 @@ context.</p>
 <dl class="py attribute">
 <dt id="docxrev.com.Document.comments">
 <code class="sig-name descname">comments</code><a class="headerlink" href="#docxrev.com.Document.comments" title="Permalink to this definition">¶</a></dt>
-<dd><p>The comments in the document. Only exists when in a <code class="docutils literal notranslate"><span class="pre">with</span></code> context.</p>
+<dd><p>The comments in the document. Only exists in context. <code class="xref py py-class docutils literal notranslate"><span class="pre">AttributeError</span></code>
+is raised when attempting to access it out of context.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p><a class="reference internal" href="#docxrev.com.Comments" title="docxrev.com.Comments">Comments</a></p>
@@ -323,7 +336,7 @@ context.</p>
 <dd><p>The COM object representation of the comments.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>win32com.gen_py.&lt;temp_dir&gt;.Comments.Comments</p>
+<dd class="field-odd"><p>win32com.&lt;…&gt;.Comments</p>
 </dd>
 </dl>
 </dd></dl>
@@ -346,7 +359,7 @@ access to <a class="reference internal" href="#docxrev.com.Comment" title="docxr
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>com_comment</strong> (<em>win32com.gen_py.&lt;temp_dir&gt;.Comment.Comment</em>) – The COM object representation of the comment. Informs the attribute
+<li><p><strong>com_comment</strong> (<em>win32com.&lt;...&gt;.Comment</em>) – The COM object representation of the comment. Informs the attribute
 <a class="reference internal" href="#docxrev.com.Comment.com" title="docxrev.com.Comment.com"><code class="xref py py-attr docutils literal notranslate"><span class="pre">com</span></code></a>.</p></li>
 <li><p><strong>comments</strong> – The list of comments in which this comment resides. Informs the attribute
 <a class="reference internal" href="#docxrev.com.Comment.in_comments" title="docxrev.com.Comment.in_comments"><code class="xref py py-attr docutils literal notranslate"><span class="pre">in_comments</span></code></a>.</p></li>
@@ -383,7 +396,7 @@ access to <a class="reference internal" href="#docxrev.com.Comment" title="docxr
 <code class="docutils literal notranslate"><span class="pre">com_comment</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>win32com.gen_py.&lt;temp_dir&gt;.Comment.Comment</p>
+<dd class="field-odd"><p>win32com.&lt;…&gt;.Comment</p>
 </dd>
 </dl>
 </dd></dl>
@@ -395,7 +408,7 @@ access to <a class="reference internal" href="#docxrev.com.Comment" title="docxr
 comment’s range.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>win32com.gen_py.&lt;temp_dir&gt;.Range.Range</p>
+<dd class="field-odd"><p>win32com.&lt;…&gt;.Range</p>
 </dd>
 </dl>
 </dd></dl>
@@ -403,11 +416,10 @@ comment’s range.</p>
 <dl class="py method">
 <dt id="docxrev.com.Comment.text">
 <em class="property">property </em><code class="sig-name descname">text</code><a class="headerlink" href="#docxrev.com.Comment.text" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convenience property returning this
-comment’s text.</p>
+<dd><p>Convenience property returning this comment’s text.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>win32com.gen_py.&lt;temp_dir&gt;.Text.Text</p>
+<dd class="field-odd"><p>str</p>
 </dd>
 </dl>
 </dd></dl>
@@ -421,7 +433,7 @@ comment’s text.</p>
 <dl class="py method">
 <dt id="docxrev.com.Comment.update">
 <code class="sig-name descname">update</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">text</span></em><span class="sig-paren">)</span><a class="headerlink" href="#docxrev.com.Comment.update" title="Permalink to this definition">¶</a></dt>
-<dd><p>Update the text of this comment.</p>
+<dd><p>Update the text of the comment.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>text</strong> (<em>str</em>) – The full text replacement of the comment.</p>
@@ -437,7 +449,7 @@ comment’s text.</p>
 <dd><p>A text range in an open Word document.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>com_range</strong> (<em>win32com.gen_py.&lt;temp_dir&gt;.Range.Range</em>) – The COM object representation of the text range. Informs the attribute
+<dd class="field-odd"><p><strong>com_range</strong> (<em>win32com.&lt;...&gt;.Range</em>) – The COM object representation of the text range. Informs the attribute
 <a class="reference internal" href="#docxrev.com.Range.com" title="docxrev.com.Range.com"><code class="xref py py-attr docutils literal notranslate"><span class="pre">com</span></code></a>.</p>
 </dd>
 </dl>
@@ -448,7 +460,7 @@ comment’s text.</p>
 <code class="docutils literal notranslate"><span class="pre">com_range</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>win32com.gen_py.&lt;temp_dir&gt;.Range.Range</p>
+<dd class="field-odd"><p>win32com.&lt;…&gt;.Range</p>
 </dd>
 </dl>
 </dd></dl>
@@ -456,11 +468,10 @@ comment’s text.</p>
 <dl class="py method">
 <dt id="docxrev.com.Range.text">
 <em class="property">property </em><code class="sig-name descname">text</code><a class="headerlink" href="#docxrev.com.Range.text" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convenience property returning this
-range’s text.</p>
+<dd><p>Convenience property returning thisrange’s text.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>win32com.gen_py.&lt;temp_dir&gt;.Text.Text</p>
+<dd class="field-odd"><p>str</p>
 </dd>
 </dl>
 </dd></dl>

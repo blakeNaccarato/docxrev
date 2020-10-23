@@ -23,7 +23,7 @@ def get_active_document(
 
     Parameters
     ----------
-    save_on_exit: test
+    save_on_exit
         Whether to save the document when exiting a ``with`` context. **Default:**
         ``True``.
     close_on_exit

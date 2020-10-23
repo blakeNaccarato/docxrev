@@ -34,27 +34,42 @@ except AttributeError:
 
 
 class Document(AbstractContextManager):
-    """An open Word document.
+    """A Word document.
+
+    Represents a Word document. Certain attributes, such as ``name``, are always
+    available. Others are only available "in context". Throughout this documentation,
+    "in context" means that the object is being handled by a context manager. For
+    example, an object is "in context" inside an indented block beneath a ``with <item>
+    [as <target>]:`` clause.
+
+    The context-specific attribute ``com`` exposes the ``win32com.<...>.Document`` class
+    directly, a COM object representation of the document which has slightly different
+    syntax and access rules than regular Python. For example, collections are
+    one-indexed rather than zero-indexed. The ``comments`` attribute exposes certain
+    aspects of the ``win32com.<...>.Comments`` class in a convenient, Pythonic
+    :py:class:`Comments` class.
 
     Parameters
     ----------
     path: Union[str, pathlib.Path]
         Path to the document. May be a string.
     save_on_exit: Optional[bool]
-        Whether to save the document when exiting a ``with`` context. Informs the
-        attribute :py:attr:`save_on_exit`.
+        Whether to save the document when leaving context. Informs the attribute
+        :py:attr:`save_on_exit`.  **Default**: True.
     close_on_exit: Optional[bool]
-        Whether to close the document when exiting a ``with`` context. By default,
-        closes documents that were not already open. Informs the attribute
-        :py:attr:`close_on_exit`.
+        Whether to close the document when leaving context. Informs the attribute
+        :py:attr:`close_on_exit`. **Default**: Closes documents that were not already
+        open.
 
     Attributes
     ----------
-    com: win32com.gen_py.<temp_dir>.Document.Document
-        The COM object representation of the document. Only exists in a ``with``
+    com: win32com.<...>.Document
+        The COM object representation of the document. Only exists in context.
+        :py:class:`AttributeError` is raised when attempting to access it out of
         context.
     comments: Comments
-        The comments in the document. Only exists when in a ``with`` context.
+        The comments in the document. Only exists in context. :py:class:`AttributeError`
+        is raised when attempting to access it out of context.
     name: str
         The filename of the document.
     save_on_exit: bool
@@ -90,7 +105,7 @@ class Document(AbstractContextManager):
         """Only called on an ``AttributeError``. Handle context-specific attributes."""
 
         if name in {"com", "comments"}:
-            message = "Can only access this attribute in a `with` context."
+            message = "Attribute only exists in context."
         else:
             message = None
 
@@ -161,7 +176,7 @@ class Comments(abc.Sequence):
     in_document: Document
         The document in which the comments reside. Informed by the parameter
         ``document``.
-    com: win32com.gen_py.<temp_dir>.Comments.Comments
+    com: win32com.<...>.Comments
         The COM object representation of the comments.
     """
 
@@ -200,7 +215,7 @@ class Comment:
 
     Parameters
     ----------
-    com_comment: win32com.gen_py.<temp_dir>.Comment.Comment
+    com_comment: win32com.<...>.Comment
         The COM object representation of the comment. Informs the attribute
         :py:attr:`com`.
     comments
@@ -214,7 +229,7 @@ class Comment:
         ``comments``.
     in_document: Document
         The document in which this comment resides.
-    com: win32com.gen_py.<temp_dir>.Comment.Comment
+    com: win32com.<...>.Comment
         The COM object representation of the comment. Informed by the parameter
         ``com_comment``.
     """
@@ -227,17 +242,14 @@ class Comment:
     @property
     def range(self):
         """
-        :win32com.gen_py.<temp_dir>.Range.Range: Convenience property returning this
+        :win32com.<...>.Range: Convenience property returning this
         comment's range.
         """
         return Range(self.com.Range)
 
     @property
     def text(self):
-        """
-        :win32com.gen_py.<temp_dir>.Text.Text: Convenience property returning this
-        comment's text.
-        """
+        """:str: Convenience property returning this comment's text."""
         return self.range.text
 
     def delete(self):
@@ -245,7 +257,7 @@ class Comment:
         self.com.DeleteRecursively()
 
     def update(self, text: str):
-        """Update the text of this comment.
+        """Update the text of the comment.
 
         Parameters
         ----------
@@ -287,23 +299,20 @@ class Range:
 
     Parameters
     ----------
-    com_range: win32com.gen_py.<temp_dir>.Range.Range
+    com_range: win32com.<...>.Range
         The COM object representation of the text range. Informs the attribute
         :py:attr:`com`.
 
     Attributes
     ----------
-    com: win32com.gen_py.<temp_dir>.Range.Range
+    com: win32com.<...>.Range
         The COM object representation of the text range. Informed by the parameter
         ``com_range``.
     """
 
     @property
     def text(self) -> str:
-        """
-        :win32com.gen_py.<temp_dir>.Text.Text: Convenience property returning this
-        range's text.
-        """
+        """:str: Convenience property returning thisrange's text."""
         return self.com.Text
 
     def __init__(self, com_range):
