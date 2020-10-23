@@ -8,6 +8,9 @@ jobs:
     runs-on: Windows
     steps:
       - uses: actions/checkout@v2
+        with:
+          persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal token
+          fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
       - name: Set up Python
         run: |
           ..\.venv\Scripts\Activate.ps1
@@ -16,3 +19,13 @@ jobs:
         run: |
           ..\.venv\Scripts\Activate.ps1
           sphinx-build docs-src docs
+      - name: Commit
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git commit -m "Rebuild documentation" -a
+      - name: Push
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
