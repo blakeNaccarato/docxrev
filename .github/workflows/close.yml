@@ -1,4 +1,4 @@
-name: Close
+name: close
 on: 
   pull_request:
     types: [closed]
