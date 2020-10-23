@@ -8,4 +8,6 @@ jobs:
     runs-on: Windows
     steps:
       - name: test
-        run: Get-Location          
+        run: |
+          Get-Location
+          Get-ChildItem
