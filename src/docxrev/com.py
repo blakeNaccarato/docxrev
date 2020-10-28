@@ -272,6 +272,7 @@ class Comment:
         com_active_window = self.in_document.com.ActiveWindow
         com_active_selection = com_active_window.Selection
         original_cursor_position = com_active_selection.Range
+        original_pane_count = com_active_window.Panes.Count  # if > 1, rev pane visible
 
         # Check whether the cursor is inside any comment
         com_active_window.Panes(1).Activate()  # Ensure we're in the main pane
@@ -291,10 +292,13 @@ class Comment:
         self.range.com.Select()
         com_active_selection.Text = text
 
-        # Restore print view and cursor position
+        # Restore print view, cursor position, and pane layout
         com_active_window.ActivePane.Close()  # Close the comments pane that comes up
         com_active_window.ActivePane.View.Type = constants.wdPrintView
         original_cursor_position.Select()
+        if original_pane_count > 1:  # If revisions pane was visible before
+            # Make it visible again
+            com_active_window.View.SplitSpecial = constants.wdPaneRevisions
 
 
 class Range:
