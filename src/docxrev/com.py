@@ -376,44 +376,47 @@ def try_com(
         Whatever is returned from the COM method.
     """
 
+    # Accept either a single error or a list of errors
     if not except_errors:
         except_errors = []
     elif not isinstance(except_errors, list):
         except_errors = [except_errors]
 
+    # Accept no messages, a single message, or a list of messages
     if not messages:
         messages = [""] * len(except_errors)
     if not isinstance(messages, list):
         messages = [messages]
 
     try:
-        returns = com_method(**kwargs)
-
-    except pywintypes.com_error as error:  # pylint: disable=no-member
+        # Apply kwargs to the method, or return the method itself if no kwargs
+        returns = com_method(**kwargs) if kwargs else com_method
+    except pywintypes.com_error as error:
         returns = None
         error_caught = False
         for except_error, user_message in zip(except_errors, messages):
             if (
                 error.hresult == except_error.hresult
-                and error.excepinfo
+                and error.excepinfo  # Some errors don't have an excepinfo
                 and error.excepinfo[-1] == except_error.scode
             ):
                 com_error_message = f"COM Error: {error}"
                 if user_message:
-                    message = user_message + " " + com_error_message
+                    message = f"{user_message} {com_error_message}"
                 else:
                     message = com_error_message
                 warn(message)
                 error_caught = True
-
+                break
         if not error_caught:
             raise error
-
     return returns
 
 
 ERRORS: Dict[str, ComError] = {
+    "bad_filename": ComError(-2147352567, -2146824128),
     "command_not_available": ComError(-2147352567, -2146823683),
+    "no_args_passed": ComError(-2147352567, -2147352571),
     "rpc_server_unavailable": ComError(-2147023174, None),
 }
 """:Dict[str, ComError]: A :py:class:`dict` of named :py:class:`ComError` errors."""
