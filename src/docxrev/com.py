@@ -97,11 +97,7 @@ class Document(AbstractContextManager):
         # Check if the document is already open, set close_on_exit accordingly
         if self.close_on_exit is None:
             already_open_documents = [doc.Name for doc in COM_WORD.Documents]
-            if self.path.name in already_open_documents:
-                self.close_on_exit = False
-            else:
-                self.close_on_exit = True
-
+            self.close_on_exit = self.path.name not in already_open_documents
         # Track nested levels of context
         self.context_count = 0
 
@@ -198,13 +194,11 @@ class Comments(abc.Sequence):
         if isinstance(index, int):
             key = index
             com_comment = self.com(key + 1)  # COM is 1-indexed
-            comment = Comment(com_comment, self)
-            return comment
+            return Comment(com_comment, self)
 
         if isinstance(index, slice):
             keys = range(*index.indices(len(self)))  # coerce keys to object bounds
-            comments = [self[key] for key in keys]  # recursive call on each key
-            return comments
+            return [self[key] for key in keys]  # recursive call on each key
 
     def __iter__(self) -> Iterator:
         return (Comment(com_comment, self) for com_comment in self.com)
