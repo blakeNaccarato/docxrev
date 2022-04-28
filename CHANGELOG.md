@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Nothing yet.
 
+## [0.2.3]
+
+- Fix `quit_word_safely`.
+
 ## [0.2.2]
 
 - Documentation.
@@ -46,7 +50,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Package setup
 
-[Unreleased]: https://github.com/blakeNaccarato/docxrev/compare/0.2.2...develop
+[Unreleased]: https://github.com/blakeNaccarato/docxrev/compare/0.2.3...develop
+[0.2.3]: https://github.com/blakeNaccarato/docxrev/releases/tag/0.2.3
 [0.2.2]: https://github.com/blakeNaccarato/docxrev/releases/tag/0.2.2
 [0.2.1]: https://github.com/blakeNaccarato/docxrev/releases/tag/0.2.1
 [0.2.0]: https://github.com/blakeNaccarato/docxrev/releases/tag/0.2.0

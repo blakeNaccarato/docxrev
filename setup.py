@@ -7,11 +7,11 @@ import pathlib
 from setuptools import find_packages, setup
 
 here = pathlib.Path().resolve()
-long_description = (here / 'README.md').read_text(encoding='utf-8')
+long_description = (here / "README.md").read_text(encoding="utf-8")
 
 setup(
     name="docxrev",
-    version="0.2.2",
+    version="0.2.3",
     description=("Microsoft Word review tools (comments, markup, etc.) with Python"),
     long_description=long_description,
     long_description_content_type="text/markdown",
