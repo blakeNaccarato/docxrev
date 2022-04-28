@@ -401,6 +401,7 @@ def try_com(
         for except_error, user_message in zip(except_errors, messages):
             if (
                 error.hresult == except_error.hresult
+                and error.excepinfo
                 and error.excepinfo[-1] == except_error.scode
             ):
                 com_error_message = f"COM Error: {error}"
@@ -418,6 +419,7 @@ def try_com(
 
 
 ERRORS: Dict[str, ComError] = {
-    "command_not_available": ComError(-2147352567, -2146823683)
+    "command_not_available": ComError(-2147352567, -2146823683),
+    "rpc_server_unavailable": ComError(-2147023174, None),
 }
 """:Dict[str, ComError]: A :py:class:`dict` of named :py:class:`ComError` errors."""

@@ -12,7 +12,10 @@ def quit_word():
 
 def quit_word_safely():
     """Quit Word if no documents are open."""
-    if not com.COM_WORD.Documents:
+    documents = com.try_com(
+        com.COM_WORD.Documents, except_errors=com.ERRORS["rpc_server_unavailable"]
+    )
+    if not documents:
         quit_word()
 
 
