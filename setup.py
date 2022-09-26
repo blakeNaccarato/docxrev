@@ -11,7 +11,7 @@ long_description = (here / "README.md").read_text(encoding="utf-8")
 
 setup(
     name="docxrev",
-    version="0.2.3",
+    version="0.2.4",
     description=("Microsoft Word review tools (comments, markup, etc.) with Python"),
     long_description=long_description,
     long_description_content_type="text/markdown",
