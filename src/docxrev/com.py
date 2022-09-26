@@ -159,7 +159,7 @@ class Document(AbstractContextManager):
                 com_method=self.com.DeleteAllComments,
                 except_errors=ERRORS["command_not_available"],
                 messages=warning_message,
-            )
+            )()
 
 
 class Comments(abc.Sequence):
